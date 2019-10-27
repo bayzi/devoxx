@@ -2,7 +2,7 @@
 
 In order to deploy a consul cluster in openshift (kubenetes), you can execute following commands.
 
-**Overview**
+## Overview
 
 - We'll be deploying a 3 node consul cluster using Statefulset
 - Communication between Consul members is secured using TLS and encryption keys
