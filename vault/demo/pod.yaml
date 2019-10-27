@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-app
+  labels:
+    app: demo-app
+spec:
+  initContainers:
+  - name: vault-init
+    image: quay.io/lbroudoux/ubi8:latest
+    command:
+      - "sh"
+      - "-c"
+      - >
+        OCP_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token);
+        curl -k --request POST --data '{"jwt": "'"$OCP_TOKEN"'", "role": "demo-app"}' https://vault-secret-mgmt.192.168.99.140.nip.io/v1/auth/kubernetes/login | jq -j '.auth.client_token' > /etc/vault/token;
+        X_VAULT_TOKEN=$(cat /etc/vault/token);
+        curl -k --header "X-Vault-Token: $X_VAULT_TOKEN" https://vault-secret-mgmt.192.168.99.140.nip.io/v1/secret/demo/app > creds.json;
+        echo "spring.datasource.passwd=$(jq -j '.data.passwd' creds.json)" >> application.properties;
+        echo "spring.datasource.user=$(jq -j '.data.user' creds.json)" >> application.properties;
+        cat application.properties;
+        cp application.properties /home/config/application.properties;
+    volumeMounts:
+    - name: app-creds
+      mountPath: /etc/app
+    - name: vault-token
+      mountPath: /etc/vault
+    - name: app-config
+      mountPath: /home/config/
+  containers:
+    - name: demo-app
+      image: busybox
+      command:
+        - "sh"
+        - "-c"
+        - "sleep 300"
+      volumeMounts:
+        - name: app-creds
+          mountPath: /etc/app
+        - name: vault-token
+          mountPath: /etc/vault
+        - name: app-config
+          mountPath: /home/config
+      securityContext:
+        privileged: false
+  serviceAccount: demo-vault
+  serviceAccountName: demo-vault
+  volumes:
+      - name: app-creds
+        emptyDir: {}
+      - name: app-config
+        emptyDir: {}
+      - name: vault-token
+        emptyDir: {}

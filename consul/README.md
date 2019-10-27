@@ -13,7 +13,7 @@ Make sure to change directory to **consul/ca**, and adapt the consul/ca/consul-c
 
 ```bash
 
-docker run -it --entrypoint /bin/sh -v $(PWD):/app golang:1.13.1-alpine3.10
+docker run -it --entrypoint /bin/sh -v $(PWD):/go golang:1.13.1-alpine3.10
 
 apk add git build-base
 
@@ -21,12 +21,14 @@ go get -u github.com/cloudflare/cfssl/cmd/cfssl
 
 go get -u github.com/cloudflare/cfssl/cmd/cfssljson
 
-cfssl gencert -initca /app/consul-csr.json | cfssljson -bare ca
+cd /app
+
+cfssl gencert -initca consul-csr.json | cfssljson -bare ca
 
 cfssl gencert -ca=ca.pem \
         -ca-key=ca-key.pem \
-        -config=/app/ca-config.json \
-        -profile=default /app/consul-csr.json \
+        -config=ca-config.json \
+        -profile=default consul-csr.json \
         | cfssljson -bare consul
 
 ```
@@ -55,9 +57,16 @@ oc create secret generic consul \
   --from-file=ca.pem \
   --from-file=consul.pem \
   --from-file=consul-key.pem
+```
 
-oc apply -f service.yaml
-oc apply -f statefulset.yaml
+For the aim of simplicity and a minimum respect of opesnhift security best practices, you need to create a specific serviceaccount that can run vault image as root. This is due to the vault image that runs with root as a user by default.
+
+```bash
+oc create serviceaccount vault-user
+oc adm policy add-scc-to-user anyuid -z vault-user
+
+oc apply -f ../service.yaml
+oc apply -f ../statefulset.yaml
 
 ```
 

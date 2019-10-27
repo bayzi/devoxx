@@ -26,6 +26,7 @@ spec:
       terminationGracePeriodSeconds: 10
       securityContext:
         fsGroup: 1000
+      serviceAccountName: vault-user
       containers:
         - name: consul-exporter
           args:
