@@ -2,7 +2,7 @@
 
 In order to deploy a consul cluster in openshift (kubenetes), you can execute following commands.
 
-**Overview**
+## Overview
 
 - We'll be deploying a 3 node consul cluster using Statefulset
 - Communication between Consul members is secured using TLS and encryption keys
@@ -76,7 +76,7 @@ Check the the state of consul pods until you get a running status:
 oc get po -w
 ```
 
-```
+```text
 NAME                     READY   STATUS    RESTARTS   AGE
 consul-0                 2/2     Running   0          38m
 consul-1                 2/2     Running   0          38m
