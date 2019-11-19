@@ -1,4 +1,4 @@
-# Readme
+# Readme vault
 
 In order to deploy vault in HA mode (3 pods by default), with consul as a backend, you only need to apply the provided resources in the vault directory.
 
@@ -30,7 +30,7 @@ oc create route passthrough vault \
 Unseal all vault instances
 
 ```bash
-for i in `oc get po | grep vault | awk '{ print $1}'`; do oc exec $i -- vault unseal -tls-skip-verify <Root Token>; done;
+for i in `oc get po -n secret-mgmt | grep vault | awk '{ print $1}'`; do oc exec $i -n secret-mgmt -- vault unseal -tls-skip-verify <Root Token>; done;
 ```
 
 Add secrets to vault

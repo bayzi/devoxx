@@ -1,5 +1,9 @@
+# Readme vulnerability scan
+
+```bash
 docker run -d --name db arminc/clair-db:latest
 docker run -p 6060:6060 --link db:postgres -d --name clair --restart on-failure docker.digilab.ocpgroup.ma/devops/clair-local-scan:v2.0.1
+```
 
 ```bash
 wget https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_darwin_amd64
